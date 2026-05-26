@@ -1,14 +1,14 @@
-FROM php:5.6-apache
+# Cambiamos la base a "stretch" (Debian 9) que es mucho más estable con los repositorios antiguos
+FROM php:5.6-apache-stretch
 
-# 1. TRUCO PARA REPOSITORIOS DEBIAN OBSOLETOS (Jessie)
+# 1. TRUCO PARA REPOSITORIOS DEBIAN OBSOLETOS (Stretch)
 RUN echo "Acquire::Check-Valid-Until \"false\";" > /etc/apt/apt.conf.d/99no-check-valid-until \
-    && echo "deb http://archive.debian.org/debian/ jessie main" > /etc/apt/sources.list \
-    && echo "deb http://archive.debian.org/debian-security jessie/updates main" >> /etc/apt/sources.list
+    && echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list \
+    && echo "deb http://archive.debian.org/debian-security stretch/updates main" >> /etc/apt/sources.list
 
 # 2. INSTALACIÓN DE EXTENSIONES OBLIGATORIAS
-# Añadimos zlib1g-dev explícitamente para solucionar el error de dependencias de libpng-dev
+# En Stretch las dependencias de imagen (GD) se resuelven solas sin conflictos
 RUN apt-get update && apt-get install -y \
-    zlib1g-dev \
     libmcrypt-dev \
     libpng-dev \
     zip \
@@ -19,7 +19,6 @@ RUN apt-get update && apt-get install -y \
 # 3. CONFIGURACIÓN DE APACHE
 RUN a2enmod rewrite
 
-# Solucionado el warning de Docker usando el formato key=value moderno
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
