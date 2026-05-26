@@ -28,10 +28,10 @@ WORKDIR /var/www/html
 COPY . .
 
 # 6. INSTALACIÓN DE DEPENDENCIAS PHP
-# Autorizamos los plugins legacy y ejecutamos sin restricciones de root
+# Añadimos --no-scripts para evitar que Artisan explote durante el build
 ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN composer config --no-plugins allow-plugins true \
-    && composer install --no-interaction --prefer-dist --no-dev
+    && composer install --no-interaction --prefer-dist --no-dev --no-scripts
 
 # 7. PERMISOS DE ESCRITURA
 RUN chown -R www-data:www-data /var/www/html \
