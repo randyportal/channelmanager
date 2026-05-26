@@ -1,14 +1,15 @@
-# Cambiamos la base a "stretch" (Debian 9) que es mucho más estable con los repositorios antiguos
 FROM php:5.6-apache-stretch
 
 # 1. TRUCO PARA REPOSITORIOS DEBIAN OBSOLETOS (Stretch)
+# Dejamos SOLO el repositorio principal (quitamos el de seguridad que da error 404)
+# y desactivamos la comprobación de fechas.
 RUN echo "Acquire::Check-Valid-Until \"false\";" > /etc/apt/apt.conf.d/99no-check-valid-until \
-    && echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list \
-    && echo "deb http://archive.debian.org/debian-security stretch/updates main" >> /etc/apt/sources.list
+    && echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list
 
 # 2. INSTALACIÓN DE EXTENSIONES OBLIGATORIAS
-# En Stretch las dependencias de imagen (GD) se resuelven solas sin conflictos
-RUN apt-get update && apt-get install -y \
+# Añadimos --allow-unauthenticated para obligar a apt-get a instalar 
+# aunque las llaves de seguridad del año 2017 estén expiradas.
+RUN apt-get update && apt-get install -y --allow-unauthenticated \
     libmcrypt-dev \
     libpng-dev \
     zip \
