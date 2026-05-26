@@ -20,15 +20,18 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# 4. INSTALACIÓN DE COMPOSER 2.2 LTS (El último compatible con PHP 5.6)
+# 4. INSTALACIÓN DE COMPOSER 2.2 LTS
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --2.2
 
 # 5. COPIAR CÓDIGO Y CONFIGURAR DIRECTORIO
 WORKDIR /var/www/html
 COPY . .
 
-# 6. INSTALACIÓN DE DEPENDENCIAS PHP (Ignorando require-dev)
-RUN composer install --no-interaction --prefer-dist --no-dev
+# 6. INSTALACIÓN DE DEPENDENCIAS PHP
+# Autorizamos los plugins legacy y ejecutamos sin restricciones de root
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN composer config --no-plugins allow-plugins true \
+    && composer install --no-interaction --prefer-dist --no-dev
 
 # 7. PERMISOS DE ESCRITURA
 RUN chown -R www-data:www-data /var/www/html \
